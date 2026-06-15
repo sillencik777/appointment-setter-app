@@ -4,6 +4,7 @@ import { useAuth } from '@/components/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TrendingUp, Mail, Lock } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -69,6 +70,13 @@ export default function LoginPage() {
               Iniciar Sesión
             </Button>
           </form>
+
+          <p className="text-center text-sm text-gray-500 mt-4">
+            ¿Primera vez?{' '}
+            <Link href="/register" className="text-indigo-600 font-medium">
+              Crear cuenta
+            </Link>
+          </p>
         </div>
 
         <p className="text-center text-indigo-200 text-xs mt-6">
