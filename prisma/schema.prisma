@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  SETTER
+  CLOSER
+}
+
+enum LeadStatus {
+  NEW
+  FIRST_CONTACT
+  RESPONDED
+  QUALIFIED
+  INTERESTED
+  MEETING_PROPOSED
+  MEETING_SCHEDULED
+  ATTENDED
+  NO_SHOW
+  SALE_CLOSED
+  SALE_LOST
+}
+
+enum LeadSource {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  GOOGLE
+  REFERRAL
+  COLD_EMAIL
+  COLD_CALL
+  WEBINAR
+  YOUTUBE
+  TIKTOK
+  OTHER
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          Role     @default(SETTER)
+  isActive      Boolean  @default(true)
+  avatar        String?
+  phone         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  setterLeads   Lead[]   @relation("SetterLeads")
+  closerLeads   Lead[]   @relation("CloserLeads")
+  activities    LeadActivity[]
+  appointments  Appointment[]
+  sales         Sale[]
+  goals         Goal[]
+
+  @@map("users")
+}
+
+model Lead {
+  id            String     @id @default(cuid())
+  firstName     String
+  lastName      String
+  company       String?
+  phone         String?
+  email         String?
+  country       String?
+  source        LeadSource @default(OTHER)
+  campaign      String?
+  status        LeadStatus @default(NEW)
+  notes         String?
+  dealValue     Float?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastContactAt DateTime?
+  qualifiedAt   DateTime?
+
+  setterId      String?
+  setter        User?      @relation("SetterLeads", fields: [setterId], references: [id])
+  closerId      String?
+  closer        User?      @relation("CloserLeads", fields: [closerId], references: [id])
+
+  activities    LeadActivity[]
+  appointments  Appointment[]
+  sales         Sale[]
+
+  @@map("leads")
+}
+
+model LeadActivity {
+  id            String     @id @default(cuid())
+  leadId        String
+  lead          Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  fromStatus    LeadStatus?
+  toStatus      LeadStatus
+  notes         String?
+  timeFromPrev  Int?       // minutes from previous status
+  createdAt     DateTime   @default(now())
+
+  @@map("lead_activities")
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  leadId        String
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  closerId      String
+  closer        User     @relation(fields: [closerId], references: [id])
+  scheduledAt   DateTime
+  duration      Int      @default(60) // minutes
+  attended      Boolean?
+  notes         String?
+  meetingLink   String?
+  reminderSent24h Boolean @default(false)
+  reminderSent1h  Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("appointments")
+}
+
+model Sale {
+  id            String   @id @default(cuid())
+  leadId        String
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  closerId      String
+  closer        User     @relation(fields: [closerId], references: [id])
+  amount        Float
+  currency      String   @default("USD")
+  product       String?
+  closedAt      DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@map("sales")
+}
+
+model Goal {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  period        String   // "weekly" | "monthly"
+  year          Int
+  week          Int?
+  month         Int?
+  leadsTarget   Int      @default(0)
+  contactsTarget Int     @default(0)
+  meetingsTarget Int     @default(0)
+  salesTarget   Int      @default(0)
+  revenueTarget Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("goals")
+}
+
+model Report {
+  id            String   @id @default(cuid())
+  type          String   // "weekly" | "monthly"
+  year          Int
+  week          Int?
+  month         Int?
+  data          Json
+  generatedAt   DateTime @default(now())
+  pdfUrl        String?
+
+  @@map("reports")
+}
