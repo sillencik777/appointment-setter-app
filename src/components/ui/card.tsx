@@ -56,14 +56,14 @@ export function StatCard({ title, value, change, changeType, icon, color = 'indi
   }
 
   return (
-    <Card className="p-5">
-      <div className="flex items-start justify-between">
+    <Card className="p-4">
+      <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900 leading-none">{value}</p>
-          {subtitle && <p className="mt-1 text-xs text-gray-500">{subtitle}</p>}
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide leading-tight mb-1">{title}</p>
+          <p className="text-xl font-bold text-gray-900 leading-none break-all">{value}</p>
+          {subtitle && <p className="mt-1 text-[11px] text-gray-500 leading-tight">{subtitle}</p>}
           {change && (
-            <p className={cn('mt-2 text-xs font-medium', {
+            <p className={cn('mt-1.5 text-[11px] font-medium', {
               'text-green-600': changeType === 'up',
               'text-red-600': changeType === 'down',
               'text-gray-500': changeType === 'neutral',
@@ -73,7 +73,7 @@ export function StatCard({ title, value, change, changeType, icon, color = 'indi
           )}
         </div>
         {icon && (
-          <div className={cn('p-2.5 rounded-lg flex-shrink-0 ml-3', colors[color] || colors.indigo)}>
+          <div className={cn('p-2 rounded-lg flex-shrink-0', colors[color] || colors.indigo)}>
             {icon}
           </div>
         )}
